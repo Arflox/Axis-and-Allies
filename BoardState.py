@@ -35,7 +35,7 @@ class Unit:
         # attack defense
         # transport capacity
 
-        def __init__(self, unit_name, unit_type, cost, attack, defense, movement, transport = False, carrier = False):
+        def __init__(self, unit_name, unit_type, cost, attack, defense, movement, weight = 6, transport = False, carrier = False):
                 self.name = unit_name
                 
                 self.unit_type = unit_type
@@ -44,9 +44,13 @@ class Unit:
                 self.attack = attack
                 self.defense = defense
                 self.movement = movement
-                
+                # self.transport_weight probably should exist, so I'll put it in
+                self.transport_weight = weight
+                #just dont forget that transports should check that their cargo is land units
                 self.is_transport = transport
-                # FIGURE OUT HOW TO REPRESENT FULL TRANSPORTS. IS THE UNIT DIRECTLY ATTACHED?
+                # FIGURE OUT HOW TO REPRESENT FULL TRANSPORTS. IS THE UNIT DIRECTLY ATTACHED? Prolly
+                #self.cargo = cargo? not sure how to get define a list in this
+               
                 self.is_carrier = carrier
         
         
@@ -655,14 +659,14 @@ class Rules:
                                         self.board[key].neighbors.append(item[0])
                 
                 
-                self.units = [Unit("infantry", "land", 3, 1, 2, 1), Unit("artillary", "land", 4, 1, 2, 1), \
-                              Unit("tank", "land", 6, 1, 2, 1), Unit("aa", "land", 6, 0, 0, 1), \
-                              Unit("factory", "land", 15, 0, 0, 0), Unit("transport", "sea", 7, 0, 0, 2, True), \
+                self.units = [Unit("infantry", "land", 3, 1, 2, 1, 2), Unit("artillery", "land", 4, 2, 2, 1, 3), \
+                              Unit("tank", "land", 6, 3, 3, 1, 3), Unit("aa", "land", 6, 0, 0, 1, 6), \
+                              Unit("factory", "land", 15, 0, 0, 0, 6), Unit("transport", "sea", 7, 0, 0, 2, True), \
                               Unit("sub", "sea", 6, 2, 1, 2), Unit("destroyer", "sea", 8, 2, 2, 2), \
                               Unit("cruiser", "sea", 12, 3, 3, 2), Unit("carrier", "sea", 14, 1, 2, False, True), \
                               Unit("battleship", "sea", 20, 2, 1, 2), Unit("fighter", "10", 10, 3, 4, 4), \
                               Unit("bomber", "air", 12, 4, 1, 6)]
-                              
+                              #how does support work?
         def get_unit(self, index):
                 return self.units[index]
                 
@@ -902,7 +906,7 @@ class Game:
                 "Western United States" : Territory_State("America", [Unit_state("America", 1), Unit_state("America", 1), Unit_state("America", 4), Unit_state("America", 5), Unit_state("America", 12)]), \ 
                 "Yakut S.S.R." : Territory_State("Russia", [Unit_state("Russia", 1)]),
                 "Yunnan" : Territory_State("America", [Unit_state("America", 1), Unit_state("America", 1)])  }
-                
+                #Ryan doesnt know how the hell this ^ works for placing units of different types
                 def export_reader(self):
                         #will read through the two exports and update the above list according to the ownership and the units within
                         
@@ -937,7 +941,7 @@ class Game:
                         unit = rules.get_unit(unit_state.type_index)
                                             
                         if (unit.unit_type == "land"):
-                                if (goal_territory.is_water == False) and (goal_territory.name in current_territory.neighbors)):
+                                if (goal_territory.is_water == False) and (goal_territory.name in current_territory.neighbors) """and goal_territory.owner =/= neutral <-not sure what syntax to use """):
                                         return True
                                 else:
                                         return False
@@ -949,11 +953,11 @@ class Game:
                         elif (unit.unit_type == "air"):
                                 if (goal_territory.is_water == False) and (goal_territory.name in current_territory.neighbors)):
                                         return True                    
+                        #how does this work with multi-movement moves? AI will probably have to do them
                         
                         
                         
-                        
-
+#fix planes, air units look like they're currently unsable to go into ocean
 #ADD IN TERRITORY OWNERSHIP AND ACCOUNT FOR IT IN THE PASSABLE FUNCTION
 # neutrals cant move to, and enemy must be during combat phase. Tanks end all movement if battle
 # check phase
@@ -1117,7 +1121,7 @@ write_pomona_urls ("https://www.pomona.edu/", Queue(), [12], \
    
 """
 DFS gives me a long list that, obviously, goes very deep first. It quickly 
-becomes basically irrelevent calander links. 
+becomes basically irrelevent calendar links. 
 Breath first search is definitely a better option here. DFS gave me tons and
 tons of calander data that just went on and on for literally years. BFS gives
 more pertinant links if you only have space for 100.
